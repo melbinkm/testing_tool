@@ -1,4 +1,4 @@
-# Setup Guide - Autonomous Pentest Engine
+# Setup Guide - AutoPentest
 
 ## Prerequisites
 - Node.js 20+
@@ -9,15 +9,13 @@
 
 ## Quick Start
 
-### 1. Clone and Build Base Framework
+### 1. Build AutoPentest
 
 ```bash
-# Clone gemini-cli (base framework)
-cd /mnt/d/testing_tool
-git clone https://github.com/anthropics/gemini-cli.git
+# Navigate to AutoPentest directory
+cd /mnt/d/testing_tool/AutoPentest
 
 # Install dependencies
-cd gemini-cli
 npm install
 
 # Build the project
@@ -31,10 +29,15 @@ npm run build
 ├── CLAUDE.md                              # AI agent guidelines
 ├── SETUP.md                               # This file
 ├── autonomous_pentest_engine_sandbox_dev_guide.md  # Development guide
-└── gemini-cli/                            # Base CLI framework
-    ├── src/                               # Source code
-    ├── tests/                             # Test files
-    └── package.json                       # Dependencies
+└── AutoPentest/                           # Main CLI tool
+    ├── packages/
+    │   ├── cli/                           # CLI application
+    │   ├── core/                          # Core library
+    │   ├── a2a-server/                    # A2A server
+    │   ├── test-utils/                    # Test utilities
+    │   └── vscode-ide-companion/          # VS Code extension
+    ├── bundle/                            # Bundled output
+    └── package.json                       # Root package config
 ```
 
 ### 3. Configuration
@@ -43,6 +46,14 @@ npm run build
 ```bash
 export GEMINI_API_KEY="your-api-key-here"
 ```
+
+**Config Directory:**
+AutoPentest uses `~/.autopentest/` for configuration:
+- `settings.json` - User preferences
+- `memory.md` - Persistent context
+
+**Ignore File:**
+Create `.autopentestignore` in your project root to exclude files from analysis.
 
 **Scope Configuration:**
 Create a `scope.json` file to define allowed targets:
@@ -54,14 +65,27 @@ Create a `scope.json` file to define allowed targets:
 }
 ```
 
-### 4. Running the Engine
+### 4. Running AutoPentest
 
 ```bash
-cd /mnt/d/testing_tool/gemini-cli
+# Run from bundle (recommended for production)
+cd /mnt/d/testing_tool/AutoPentest
+node bundle/autopentest.js
+
+# Or use npm start for development
 npm start
 ```
 
-### 5. MCP Servers
+### 5. Environment Variables
+
+| Variable | Description |
+|----------|-------------|
+| `GEMINI_API_KEY` | API key for Gemini models |
+| `AUTOPENTEST_HOME` | Override home directory for config |
+| `AUTOPENTEST_SANDBOX` | Sandbox mode (false/docker/podman) |
+| `AUTOPENTEST_DEBUG` | Enable debug logging |
+
+### 6. MCP Servers
 
 | Server | Status | Description |
 |--------|--------|-------------|
@@ -103,10 +127,14 @@ npm run build
 **API key not found:**
 Ensure the environment variable is set in your current shell session.
 
+**Bundle not found:**
+Run `npm run bundle` to create the bundle.
+
 ## Changelog
 
 | Date | Change | Author |
 |------|--------|--------|
+| 2026-02-05 | Renamed from gemini-cli to AutoPentest | AI Agent |
 | 2026-02-05 | Initial SETUP.md created | AI Agent |
 
 ---
