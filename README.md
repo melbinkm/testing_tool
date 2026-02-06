@@ -40,6 +40,8 @@ Pentest Engine combines AI-powered analysis with specialized MCP (Model Context 
 - **npm** version 9 or higher
 - **Operating System**: Linux, macOS, or Windows (WSL)
 - **API Access**: Google AI API key or OAuth credentials
+- **Java 21+** (optional, for Burp Suite MCP integration)
+- **Burp Suite Professional** (optional, for Burp integration)
 
 ## Installation
 
@@ -180,8 +182,40 @@ The engine includes specialized MCP servers for security testing:
 | **validator-mcp** | Validates and confirms findings | 105 |
 | **evidence-mcp** | Collects and bundles evidence | 196 |
 | **world-model-mcp** | SQLite database for tracking assets/findings | 102 |
+| **burp-mcp** | Burp Suite integration ([official PortSwigger](https://github.com/PortSwigger/mcp-server)) | - |
 
-**Total: 1,047 tests passing**
+**Total: 1,047+ tests passing**
+
+### Burp Suite Integration
+
+The Burp MCP server uses the [official PortSwigger MCP extension](https://github.com/PortSwigger/mcp-server):
+
+```bash
+# 1. Clone and build the extension
+git clone https://github.com/PortSwigger/mcp-server.git
+cd mcp-server
+./gradlew embedProxyJar
+
+# 2. Install in Burp Suite
+# Extensions → Add → Java → select build/libs/burp-mcp-all.jar
+
+# 3. Enable MCP in Burp
+# Go to MCP tab → Enable server (default: http://127.0.0.1:9876)
+```
+
+**Configuration for stdio clients:**
+```json
+{
+  "mcpServers": {
+    "burp": {
+      "command": "java",
+      "args": ["-jar", "/path/to/mcp-proxy-all.jar", "--sse-url", "http://127.0.0.1:9876"]
+    }
+  }
+}
+```
+
+**Direct SSE connection:** `http://127.0.0.1:9876/sse`
 
 ## Example Workflows
 
@@ -243,10 +277,16 @@ Add MCP servers to `~/.autopentest/settings.json`:
     "openapi": {
       "command": "node",
       "args": ["/mnt/d/testing_tool/mcp-servers/openapi-mcp/dist/server.js"]
+    },
+    "burp": {
+      "command": "java",
+      "args": ["-jar", "/path/to/mcp-proxy-all.jar", "--sse-url", "http://127.0.0.1:9876"]
     }
   }
 }
 ```
+
+> **Note**: The Burp MCP server requires [Burp Suite Professional](https://portswigger.net/burp/pro) with the [official MCP extension](https://github.com/PortSwigger/mcp-server) installed and running.
 
 ### Environment Variables
 
@@ -299,6 +339,7 @@ npm test
 │   ├── validator-mcp/     # Finding validation
 │   ├── evidence-mcp/      # Evidence collection
 │   └── world-model-mcp/   # State management
+│   # Burp integration via official PortSwigger extension (external)
 └── scope/                 # Engagement definitions
     └── engagement.yaml    # Scope configuration
 ```
