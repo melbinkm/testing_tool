@@ -8,11 +8,7 @@ build/
 *.js.map
 *.d.ts.map
 
-# Compiled TypeScript in source directories (keep source .ts files)
-AutoPentest/packages/*/src/**/*.js
-AutoPentest/packages/*/src/**/*.d.ts
-AutoPentest/packages/*/*.js
-AutoPentest/packages/*/*.d.ts
+# Compiled TypeScript in source directories
 mcp-servers/*/src/**/*.js
 mcp-servers/*/src/**/*.d.ts
 
@@ -57,9 +53,14 @@ tmp/
 temp/
 *.tmp
 
-# Package manager locks (keep package-lock.json but ignore others)
+# Package manager locks (keep package-lock.json)
 yarn.lock
 pnpm-lock.yaml
 
 # Vitest
 .vitest/
+
+# Evidence output (keep structure, ignore contents)
+evidence/*.json
+evidence/*.png
+evidence/*.html
