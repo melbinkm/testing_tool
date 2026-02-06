@@ -1,24 +1,24 @@
-# Setup Guide - AutoPentest
+# Setup Guide - Pentest MCP Servers
 
 ## Prerequisites
 - Node.js 20+
-- npm or yarn
+- npm
 - Git
-- Gemini API key
+- Gemini CLI (or any MCP-compatible client)
+- Google Cloud Auth (for AI features): `gcloud auth application-default login`
 - Burp Suite Professional (optional, for proxy integration)
 
 ## Quick Start
 
-### 1. Build AutoPentest
+### 1. Install Dependencies
 
 ```bash
-# Navigate to AutoPentest directory
-cd /mnt/d/testing_tool/AutoPentest
+cd /mnt/d/testing_tool
 
-# Install dependencies
+# Install all MCP servers
 npm install
 
-# Build the project
+# Build all servers
 npm run build
 ```
 
@@ -26,176 +26,173 @@ npm run build
 
 ```
 /mnt/d/testing_tool/
-├── .autopentest/                          # Configuration directory
-│   ├── settings.json                      # MCP server and tool settings
-│   ├── config.yaml                        # Project configuration
-│   ├── skills/                            # Custom skills
-│   └── commands/                          # Custom commands
-├── AutoPentest/                           # Main CLI tool (base framework)
-│   ├── packages/
-│   │   ├── cli/                           # CLI application
-│   │   ├── core/                          # Core library
-│   │   ├── a2a-server/                    # A2A server
-│   │   ├── test-utils/                    # Test utilities
-│   │   └── vscode-ide-companion/          # VS Code extension
-│   ├── bundle/                            # Bundled output
-│   └── package.json                       # AutoPentest package config
-├── mcp-servers/                           # MCP server projects (Phase 2+)
-├── scope/                                 # Scope definitions
-│   └── engagement.yaml                    # Engagement scope template
-├── evidence/                              # Evidence storage
-├── logs/                                  # Audit logs
-├── data/                                  # Database files
-├── tests/                                 # Project tests
-│   └── phase1/                            # Phase 1 tests
-├── CLAUDE.md                              # AI agent guidelines
-├── SETUP.md                               # This file
-├── package.json                           # Root workspace package.json
-└── autonomous_pentest_engine_sandbox_dev_guide.md  # Development guide
+├── mcp-servers/              # MCP server implementations
+│   ├── scope-guard-mcp/      # Scope validation
+│   ├── browser-mcp/          # Browser automation
+│   ├── http-client-mcp/      # HTTP requests
+│   ├── openapi-mcp/          # OpenAPI parsing
+│   ├── auth-tester-mcp/      # Auth testing
+│   ├── fuzzer-mcp/           # Parameter fuzzing
+│   ├── nuclei-mcp/           # Vulnerability scanning
+│   ├── validator-mcp/        # Finding validation
+│   ├── evidence-mcp/         # Evidence collection
+│   └── world-model-mcp/      # State management
+├── scope/                    # Engagement definitions
+│   └── engagement.yaml       # Scope configuration
+├── evidence/                 # Captured evidence
+├── logs/                     # Audit logs
+├── CLAUDE.md                 # AI agent guidelines
+├── SETUP.md                  # This file
+└── package.json              # Workspace configuration
 ```
 
-### 3. Configuration
+### 3. Configure MCP Client
 
-**API Key Setup:**
-```bash
-export GEMINI_API_KEY="your-api-key-here"
+**For Gemini CLI** (`~/.gemini/settings.json`):
+```json
+{
+  "mcpServers": {
+    "scope-guard": {
+      "command": "node",
+      "args": ["/mnt/d/testing_tool/mcp-servers/scope-guard-mcp/dist/index.js"],
+      "env": {
+        "SCOPE_FILE": "/mnt/d/testing_tool/scope/engagement.yaml",
+        "FAIL_CLOSED": "true"
+      }
+    },
+    "browser": {
+      "command": "node",
+      "args": ["/mnt/d/testing_tool/mcp-servers/browser-mcp/dist/index.js"],
+      "env": {
+        "ENGAGEMENT_ID": "PENTEST-001",
+        "HEADLESS": "false",
+        "BURP_PROXY_URL": "http://127.0.0.1:8080"
+      }
+    },
+    "http-client": {
+      "command": "node",
+      "args": ["/mnt/d/testing_tool/mcp-servers/http-client-mcp/dist/index.js"],
+      "env": {
+        "ENGAGEMENT_ID": "PENTEST-001",
+        "MAX_RPS": "10"
+      }
+    }
+  }
+}
 ```
 
-**Config Directory:**
-AutoPentest uses `~/.autopentest/` for configuration:
-- `settings.json` - User preferences
-- `memory.md` - Persistent context
+**For Claude Code** (`.claude/settings.json` or `CLAUDE.md`).
 
-**Ignore File:**
-Create `.autopentestignore` in your project root to exclude files from analysis.
+### 4. Configure Engagement Scope
 
-**Scope Configuration:**
-Define engagement scope in `scope/engagement.yaml`:
+Edit `scope/engagement.yaml`:
 ```yaml
+schema_version: "1.0"
+
+engagement:
+  id: "PENTEST-001"
+  name: "My Security Assessment"
+
 allowlist:
   domains:
     - "*.example.com"
   ip_ranges:
     - "192.168.1.0/24"
+  ports:
+    - 80
+    - 443
+
 denylist:
   domains:
     - "production.example.com"
+
 constraints:
   rate_limits:
     requests_per_second: 10
     max_concurrent: 5
-approval_policy:
-  mode: "INTERACTIVE"  # INTERACTIVE, AUTO_APPROVE, DENY_ALL
 ```
 
-### 4. Running AutoPentest
+### 5. Start Testing
 
 ```bash
-# Run from bundle (recommended for production)
-cd /mnt/d/testing_tool/AutoPentest
-node bundle/autopentest.js
+# Start Gemini CLI
+gemini
 
-# Or use npm start for development
-npm start
+# In the CLI, you can now use:
+> Navigate to https://target.com and test the search form for XSS
+> Parse the OpenAPI spec at https://api.target.com/docs
+> Fuzz the login endpoint for SQL injection
 ```
 
-### 5. Environment Variables
+## MCP Servers
+
+| Server | Description | Key Tools |
+|--------|-------------|-----------|
+| **scope-guard-mcp** | Scope enforcement | `validate_target`, `check_scope` |
+| **browser-mcp** | Browser automation | `browser_navigate`, `browser_act`, `browser_test_xss` |
+| **http-client-mcp** | HTTP requests | `http_request`, `http_get`, `http_post` |
+| **openapi-mcp** | OpenAPI parsing | `parse_openapi`, `list_endpoints` |
+| **auth-tester-mcp** | Auth testing | `test_auth`, `differential_test` |
+| **fuzzer-mcp** | Fuzzing | `fuzz_parameter`, `generate_payloads` |
+| **nuclei-mcp** | Vulnerability scanning | `nuclei_scan` |
+| **validator-mcp** | Finding validation | `validate_finding` |
+| **evidence-mcp** | Evidence capture | `capture_evidence`, `create_bundle` |
+| **world-model-mcp** | State tracking | `add_asset`, `add_finding` |
+
+## Environment Variables
 
 | Variable | Description |
 |----------|-------------|
-| `GEMINI_API_KEY` | API key for Gemini models |
-| `AUTOPENTEST_HOME` | Override home directory for config |
-| `AUTOPENTEST_SANDBOX` | Sandbox mode (false/docker/podman) |
-| `AUTOPENTEST_DEBUG` | Enable debug logging |
+| `GEMINI_API_KEY` | API key for Gemini (optional if using ADC) |
+| `SCOPE_FILE` | Path to engagement.yaml |
+| `BURP_PROXY_URL` | Burp Suite proxy URL (e.g., `http://127.0.0.1:8080`) |
+| `HEADLESS` | Browser headless mode (`true`/`false`) |
+| `ENGAGEMENT_ID` | Current engagement ID |
+| `MAX_RPS` | Rate limit (requests per second) |
 
-### 6. MCP Servers
+## Running Tests
 
-| Server | Status | Description |
-|--------|--------|-------------|
-| scope-guard-mcp | Implemented | Scope validation and budget tracking |
-| http-client-mcp | Implemented | Rate-limited HTTP client with correlation headers |
-| auth-tester-mcp | Implemented | BOLA/IDOR differential testing with multiple identities |
-| validator-mcp | Implemented | Finding validation with reproduction and confidence scoring |
-| evidence-mcp | Implemented | Evidence bundling, redaction, report generation, audit trail |
-| nuclei-mcp | Implemented | Nuclei vulnerability scanner wrapper with mock mode |
-| fuzzer-mcp | Implemented | Schema-based API fuzzer with signal detection |
-| Recon MCP | Planned | DNS, subdomain enumeration |
-| Burp MCP | Planned | Burp Suite integration |
-| ZAP MCP | Future | OWASP ZAP integration |
+```bash
+# Run all MCP server tests
+npm test
 
-### 7. Custom Commands
+# Run specific server tests
+cd mcp-servers/browser-mcp && npm test
 
-| Command | Description |
-|---------|-------------|
-| `/scope` | Display current engagement scope and budget status |
-| `/engage` | Start new pentest engagement with scope validation |
-| `/killswitch` | Emergency stop - halt all testing operations |
-
-### 8. Skills
-
-| Skill | Description |
-|-------|-------------|
-| pentest-planner | Generate structured test hypotheses from attack surface |
-| vulnerability-validator | Validate findings with reproduction and controls |
-
-## Development Phases Status
-
-- [x] Phase 1: Environment Setup (Completed 2026-02-05)
-  - Created project directory structure
-  - Created configuration files (settings.json, config.yaml)
-  - Created engagement scope template
-  - Set up npm workspaces
-  - Phase 1 tests passing (38 tests)
-- [x] Phase 2-9: Core MCP Servers (Completed 2026-02-05)
-  - scope-guard-mcp, http-client-mcp, auth-tester-mcp
-  - validator-mcp, evidence-mcp
-  - 451+ tests passing
-- [x] Phase 10: Advanced Tools (Completed 2026-02-05)
-  - nuclei-mcp: Nuclei vulnerability scanner wrapper
-  - fuzzer-mcp: Schema-based API fuzzer
-  - Audit trail components (run manifest, action ledger)
-  - Custom commands (/scope, /engage, /killswitch)
-  - Skills (pentest-planner, vulnerability-validator)
-  - 130+ new tests
-- [ ] Phase 11: ZAP Integration (Future)
-- [ ] Phase 12: Full Orchestration
+# Run with coverage
+npm test -- --coverage
+```
 
 ## Troubleshooting
 
-### Common Issues
-
-**Node.js version mismatch:**
+### Build errors
 ```bash
-# Check version
-node --version
-# Should be 20.x or higher
-```
-
-**Build errors:**
-```bash
-# Clean and rebuild
 rm -rf node_modules
 npm install
 npm run build
 ```
 
-**API key not found:**
-Ensure the environment variable is set in your current shell session.
+### Google auth not working
+```bash
+gcloud auth application-default login
+```
 
-**Bundle not found:**
-Run `npm run bundle` to create the bundle.
+### Browser not opening
+Check `HEADLESS` is set to `false` in your MCP config.
+
+### Requests not appearing in Burp
+1. Ensure Burp is running on the configured port
+2. Check `BURP_PROXY_URL` matches Burp's listener
+3. Verify the browser session was created with proxy enabled
 
 ## Changelog
 
-| Date | Change | Author |
-|------|--------|--------|
-| 2026-02-05 | Phase 10: Added nuclei-mcp, fuzzer-mcp, audit trail, commands, skills | AI Agent |
-| 2026-02-05 | Added evidence-mcp: Evidence bundling, redaction, report generation (135 tests) | AI Agent |
-| 2026-02-05 | Added validator-mcp: Finding validation with confidence scoring (105 tests) | AI Agent |
-| 2026-02-05 | Added auth-tester-mcp: BOLA/IDOR differential testing (75 tests) | AI Agent |
-| 2026-02-05 | Phase 1 completed: directory structure, configs, scope template, tests | AI Agent |
-| 2026-02-05 | Renamed from gemini-cli to AutoPentest | AI Agent |
-| 2026-02-05 | Initial SETUP.md created | AI Agent |
+| Date | Change |
+|------|--------|
+| 2026-02-06 | Simplified to MCP-only architecture (removed AutoPentest CLI wrapper) |
+| 2026-02-06 | Added browser-mcp with Gemini ADC auth, XSS testing, direct DOM tools |
+| 2026-02-05 | Added nuclei-mcp, fuzzer-mcp, evidence-mcp, validator-mcp |
+| 2026-02-05 | Initial MCP servers: scope-guard, http-client, auth-tester |
 
 ---
-*This file should be updated after every major change to the project.*
+*Update this file after every major change.*

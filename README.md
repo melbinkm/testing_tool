@@ -1,17 +1,16 @@
-# Pentest Engine
+# Pentest MCP Servers
 
-A Human-in-the-Loop Autonomous Web/API Penetration Testing Engine powered by AI.
+A collection of MCP (Model Context Protocol) servers for AI-powered penetration testing. Works with **Gemini CLI**, **Claude Code**, or any MCP-compatible client.
 
 ## Overview
 
-Pentest Engine combines AI-powered analysis with specialized MCP (Model Context Protocol) servers to conduct authorized security assessments. It enforces strict scope boundaries, requires human approval for sensitive actions, and maintains comprehensive audit trails.
+These MCP servers provide security testing capabilities that integrate with any AI assistant supporting the MCP protocol. The servers handle scope enforcement, rate limiting, evidence collection, and specialized pentest workflows.
 
 ## Architecture
 
 ```
 ┌─────────────────────────────────────────────────────────────────┐
-│                         AutoPentest CLI                          │
-│                    (AI-Powered Testing Agent)                    │
+│              Gemini CLI / Claude Code / Any MCP Client          │
 └─────────────────────────────────────────────────────────────────┘
                                 │
                     ┌───────────┴───────────┐
@@ -19,13 +18,13 @@ Pentest Engine combines AI-powered analysis with specialized MCP (Model Context 
     ┌───────────────┼───────────────────────┼───────────────┐
     │               │                       │               │
 ┌───┴───┐    ┌─────┴─────┐    ┌────────────┴──┐    ┌──────┴──────┐
-│ Scope │    │   HTTP    │    │   OpenAPI     │    │   Nuclei    │
-│ Guard │    │  Client   │    │   Parser      │    │   Scanner   │
+│ Scope │    │  Browser  │    │     HTTP      │    │   Nuclei    │
+│ Guard │    │   MCP     │    │    Client     │    │   Scanner   │
 └───────┘    └───────────┘    └───────────────┘    └─────────────┘
     │               │                       │               │
 ┌───┴───┐    ┌─────┴─────┐    ┌────────────┴──┐    ┌──────┴──────┐
-│ Auth  │    │  Fuzzer   │    │   Validator   │    │  Evidence   │
-│Tester │    │           │    │               │    │  Collector  │
+│ Auth  │    │  Fuzzer   │    │   OpenAPI     │    │  Evidence   │
+│Tester │    │           │    │   Parser      │    │  Collector  │
 └───────┘    └───────────┘    └───────────────┘    └─────────────┘
                                 │
                     ┌───────────┴───────────┐
@@ -38,67 +37,85 @@ Pentest Engine combines AI-powered analysis with specialized MCP (Model Context 
 
 - **Node.js** version 20 or higher
 - **npm** version 9 or higher
-- **Operating System**: Linux, macOS, or Windows (WSL)
-- **API Access**: Google AI API key or OAuth credentials
-- **Java 21+** (optional, for Burp Suite MCP integration)
-- **Burp Suite Professional** (optional, for Burp integration)
+- **Gemini CLI** or any MCP-compatible client
+- **Google Cloud Auth** (for browser AI features): `gcloud auth application-default login`
 
 ## Installation
 
-### 1. Clone and Install
-
 ```bash
-cd /mnt/d/testing_tool
+# Clone the repository
+git clone <repo-url> pentest-mcp
+cd pentest-mcp
 
-# Install root dependencies
+# Install all MCP servers
 npm install
 
-# Install AutoPentest dependencies
-cd AutoPentest
-npm install
-
-# Build the project
+# Build all servers
 npm run build
-
-# Create the bundle
-npm run bundle
 ```
 
-### 2. Configure Authentication
+## Configuration
 
-**Option A: Google OAuth (Recommended)**
-```bash
-# Run with Google login
-GOOGLE_GENAI_USE_GCA=true npm start
-```
-This opens a browser for Google OAuth authentication.
+### For Gemini CLI
 
-**Option B: API Key**
-```bash
-# Set your Gemini API key
-export GEMINI_API_KEY="your-api-key-here"
-npm start
-```
+Add to `~/.gemini/settings.json`:
 
-**Option C: Settings File**
-```bash
-mkdir -p ~/.autopentest
-cat > ~/.autopentest/settings.json << 'EOF'
+```json
 {
-  "core": {
-    "auth": {
-      "selectedType": "oauth-personal"
+  "mcpServers": {
+    "scope-guard": {
+      "command": "node",
+      "args": ["/path/to/pentest-mcp/mcp-servers/scope-guard-mcp/dist/index.js"],
+      "env": {
+        "SCOPE_FILE": "/path/to/pentest-mcp/scope/engagement.yaml",
+        "FAIL_CLOSED": "true"
+      }
+    },
+    "browser": {
+      "command": "node",
+      "args": ["/path/to/pentest-mcp/mcp-servers/browser-mcp/dist/index.js"],
+      "env": {
+        "ENGAGEMENT_ID": "PENTEST-001",
+        "HEADLESS": "false",
+        "BURP_PROXY_URL": "http://127.0.0.1:8080"
+      }
+    },
+    "http-client": {
+      "command": "node",
+      "args": ["/path/to/pentest-mcp/mcp-servers/http-client-mcp/dist/index.js"],
+      "env": {
+        "ENGAGEMENT_ID": "PENTEST-001",
+        "MAX_RPS": "10"
+      }
     }
   }
 }
-EOF
 ```
+
+### For Claude Code
+
+Add to `.claude/settings.json` or project's `CLAUDE.md`.
+
+## MCP Servers
+
+| Server | Description | Key Tools |
+|--------|-------------|-----------|
+| **scope-guard-mcp** | Enforces scope boundaries | `validate_target`, `check_scope` |
+| **browser-mcp** | Browser automation with Burp proxy | `browser_navigate`, `browser_act`, `browser_test_xss` |
+| **http-client-mcp** | Rate-limited HTTP requests | `http_request`, `http_get`, `http_post` |
+| **openapi-mcp** | OpenAPI spec parsing | `parse_openapi`, `list_endpoints` |
+| **auth-tester-mcp** | Authentication testing | `test_auth`, `differential_test` |
+| **fuzzer-mcp** | Parameter fuzzing | `fuzz_parameter`, `generate_payloads` |
+| **nuclei-mcp** | Vulnerability scanning | `nuclei_scan`, `list_templates` |
+| **validator-mcp** | Finding validation | `validate_finding`, `confirm_vuln` |
+| **evidence-mcp** | Evidence collection | `capture_evidence`, `create_bundle` |
+| **world-model-mcp** | State tracking (SQLite) | `add_asset`, `add_finding`, `query` |
 
 ## Quick Start
 
 ### 1. Define Your Scope
 
-Create or edit `scope/engagement.yaml`:
+Edit `scope/engagement.yaml`:
 
 ```yaml
 schema_version: "1.0"
@@ -106,231 +123,103 @@ schema_version: "1.0"
 engagement:
   id: "PENTEST-001"
   name: "My Security Assessment"
-  start_date: "2025-01-01"
-  end_date: "2025-12-31"
 
-# Targets allowed for testing
 allowlist:
   domains:
     - "*.target.example.com"
-    - "api.target.example.com"
-  ip_ranges:
-    - "192.168.100.0/24"
   ports:
     - 80
     - 443
-    - 8080
 
-# Targets forbidden from testing
 denylist:
   domains:
     - "production.example.com"
-  ip_ranges:
-    - "192.168.100.1/32"  # Gateway
 
-# Rate limiting
 constraints:
   rate_limits:
     requests_per_second: 10
-    max_concurrent: 5
-  budget:
-    max_total_requests: 10000
-
-# Actions requiring approval
-actions:
-  forbidden:
-    - "denial_of_service"
-    - "data_exfiltration"
-  requires_approval:
-    - "authentication_bypass"
-    - "command_injection"
 ```
 
-### 2. Start the Tool
+### 2. Start Gemini CLI
 
 ```bash
-cd AutoPentest
-GOOGLE_GENAI_USE_GCA=true npm start
+gemini
 ```
 
-### 3. Run a Security Test
-
-In the interactive CLI, you can:
+### 3. Run Security Tests
 
 ```
-> Analyze the API at https://api.target.example.com for security vulnerabilities
+> Navigate to https://target.example.com and test the login form for XSS
 
-> Parse the OpenAPI spec and identify endpoints with potential IDOR vulnerabilities
+> Parse the OpenAPI spec and find endpoints with user input
 
-> Fuzz the /users/{id} endpoint with boundary value payloads
-
-> Test authentication mechanisms for bypass vulnerabilities
+> Fuzz the search parameter for SQL injection
 ```
 
-## MCP Servers
+## Browser MCP Tools
 
-The engine includes specialized MCP servers for security testing:
+The browser MCP provides both AI-powered and direct DOM tools:
 
-| Server | Description | Tests |
-|--------|-------------|-------|
-| **scope-guard-mcp** | Enforces scope boundaries and validates targets | 131 |
-| **http-client-mcp** | Rate-limited HTTP client with budget tracking | 91 |
-| **openapi-mcp** | Parses OpenAPI 3.x specs for endpoint discovery | 72 |
-| **auth-tester-mcp** | Tests authentication and authorization | 75 |
-| **fuzzer-mcp** | Schema-based fuzzing with signal detection | 164 |
-| **nuclei-mcp** | Vulnerability scanning with Nuclei templates | 111 |
-| **validator-mcp** | Validates and confirms findings | 105 |
-| **evidence-mcp** | Collects and bundles evidence | 196 |
-| **world-model-mcp** | SQLite database for tracking assets/findings | 102 |
-| **burp-mcp** | Burp Suite integration ([official PortSwigger](https://github.com/PortSwigger/mcp-server)) | - |
+### AI-Powered (requires Google auth)
+- `browser_act` - Natural language actions ("click the login button")
+- `browser_extract` - AI data extraction
 
-**Total: 1,047+ tests passing**
+### Direct DOM (no AI needed)
+- `browser_click` - Click by CSS selector
+- `browser_fill` - Fill input by selector
+- `browser_press_key` - Keyboard input
+- `browser_dismiss_popups` - Close common overlays
 
-### Burp Suite Integration
-
-The Burp MCP server uses the [official PortSwigger MCP extension](https://github.com/PortSwigger/mcp-server):
-
-```bash
-# 1. Clone and build the extension
-git clone https://github.com/PortSwigger/mcp-server.git
-cd mcp-server
-./gradlew embedProxyJar
-
-# 2. Install in Burp Suite
-# Extensions → Add → Java → select build/libs/burp-mcp-all.jar
-
-# 3. Enable MCP in Burp
-# Go to MCP tab → Enable server (default: http://127.0.0.1:9876)
-```
-
-**Configuration for stdio clients:**
-```json
-{
-  "mcpServers": {
-    "burp": {
-      "command": "java",
-      "args": ["-jar", "/path/to/mcp-proxy-all.jar", "--sse-url", "http://127.0.0.1:9876"]
-    }
-  }
-}
-```
-
-**Direct SSE connection:** `http://127.0.0.1:9876/sse`
+### Security Testing
+- `browser_discover_forms` - Find all forms
+- `browser_test_xss` - Test fields for XSS
+- `browser_screenshot` - Capture evidence
 
 ## Example Workflows
 
+### XSS Testing
+```
+1. browser_navigate to https://target.com
+2. browser_dismiss_popups (if needed)
+3. browser_discover_forms
+4. browser_test_xss on each form field
+5. browser_screenshot for evidence
+```
+
 ### API Security Assessment
-
 ```
-1. Load the OpenAPI specification
-   > Parse the OpenAPI spec at https://api.example.com/openapi.json
-
-2. Review discovered endpoints
-   > List all endpoints that accept user input
-
-3. Test for IDOR vulnerabilities
-   > Test the GET /users/{id} endpoint for IDOR using IDs 1-100
-
-4. Fuzz parameters
-   > Fuzz the limit and offset parameters on /users for injection
-
-5. Generate report
-   > Create a security assessment report with all findings
+1. parse_openapi https://api.target.com/openapi.json
+2. list_endpoints
+3. fuzz_parameter on user-input fields
+4. validate_finding for any anomalies
+5. capture_evidence for confirmed issues
 ```
-
-### Authentication Testing
-
-```
-1. Load test credentials
-   > Load authentication identities from the engagement scope
-
-2. Test access controls
-   > Perform differential testing between admin and user roles
-
-3. Check for privilege escalation
-   > Test if user role can access admin endpoints
-
-4. Document findings
-   > Create evidence bundle for authentication bypass finding
-```
-
-## Configuration
-
-### MCP Server Configuration
-
-Add MCP servers to `~/.autopentest/settings.json`:
-
-```json
-{
-  "mcpServers": {
-    "scope-guard": {
-      "command": "node",
-      "args": ["/mnt/d/testing_tool/mcp-servers/scope-guard-mcp/dist/server.js"],
-      "env": {
-        "SCOPE_FILE": "/mnt/d/testing_tool/scope/engagement.yaml"
-      }
-    },
-    "http-client": {
-      "command": "node",
-      "args": ["/mnt/d/testing_tool/mcp-servers/http-client-mcp/dist/server.js"]
-    },
-    "openapi": {
-      "command": "node",
-      "args": ["/mnt/d/testing_tool/mcp-servers/openapi-mcp/dist/server.js"]
-    },
-    "burp": {
-      "command": "java",
-      "args": ["-jar", "/path/to/mcp-proxy-all.jar", "--sse-url", "http://127.0.0.1:9876"]
-    }
-  }
-}
-```
-
-> **Note**: The Burp MCP server requires [Burp Suite Professional](https://portswigger.net/burp/pro) with the [official MCP extension](https://github.com/PortSwigger/mcp-server) installed and running.
-
-### Environment Variables
-
-| Variable | Description |
-|----------|-------------|
-| `GEMINI_API_KEY` | API key for Gemini models |
-| `GOOGLE_GENAI_USE_GCA` | Set to `true` for Google OAuth |
-| `SCOPE_FILE` | Path to engagement scope YAML |
-| `EVIDENCE_PATH` | Path for storing evidence files |
 
 ## Safety Features
 
-1. **Scope Enforcement**: All targets validated against allowlist/denylist
-2. **Rate Limiting**: Configurable request limits per second
-3. **Budget Tracking**: Maximum requests per target/total
-4. **Human Approval**: Sensitive actions require explicit approval
-5. **Audit Trail**: All actions logged with correlation IDs
-6. **Evidence Collection**: Automatic capture with PII redaction
+1. **Scope Enforcement** - All targets validated before requests
+2. **Rate Limiting** - Configurable requests per second
+3. **Budget Tracking** - Maximum request limits
+4. **Correlation IDs** - Full request traceability in Burp
+5. **Evidence Collection** - Automatic capture with PII redaction
 
 ## Running Tests
 
 ```bash
-# Run all MCP server tests
-cd /mnt/d/testing_tool/mcp-servers
-for dir in */; do (cd "$dir" && npm test); done
+# Run all tests
+npm test
 
 # Run specific server tests
-cd /mnt/d/testing_tool/mcp-servers/scope-guard-mcp
-npm test
+cd mcp-servers/browser-mcp && npm test
 ```
 
 ## Project Structure
 
 ```
-/mnt/d/testing_tool/
-├── AutoPentest/           # Main CLI application
-│   ├── packages/
-│   │   ├── cli/           # CLI interface
-│   │   ├── core/          # Core functionality
-│   │   └── a2a-server/    # Agent-to-agent server
-│   ├── bundle/            # Bundled application
-│   └── .gemini/           # Commands and skills
+pentest-mcp/
 ├── mcp-servers/           # MCP server implementations
 │   ├── scope-guard-mcp/   # Scope enforcement
+│   ├── browser-mcp/       # Browser automation
 │   ├── http-client-mcp/   # HTTP requests
 │   ├── openapi-mcp/       # OpenAPI parsing
 │   ├── auth-tester-mcp/   # Auth testing
@@ -339,42 +228,10 @@ npm test
 │   ├── validator-mcp/     # Finding validation
 │   ├── evidence-mcp/      # Evidence collection
 │   └── world-model-mcp/   # State management
-│   # Burp integration via official PortSwigger extension (external)
-└── scope/                 # Engagement definitions
-    └── engagement.yaml    # Scope configuration
-```
-
-## Troubleshooting
-
-### Build Errors
-
-```bash
-# Clean and rebuild
-cd AutoPentest
-rm -rf node_modules packages/*/dist
-npm install
-npm run build
-```
-
-### Authentication Issues
-
-```bash
-# Clear stored credentials
-rm -rf ~/.autopentest/oauth*
-
-# Re-authenticate
-GOOGLE_GENAI_USE_GCA=true npm start
-```
-
-### MCP Server Issues
-
-```bash
-# Test individual server
-cd mcp-servers/scope-guard-mcp
-npm test
-
-# Check server builds
-npm run build
+├── scope/                 # Engagement definitions
+│   └── engagement.yaml    # Scope configuration
+├── evidence/              # Captured evidence
+└── README.md
 ```
 
 ## Security Notice

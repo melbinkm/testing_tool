@@ -1,25 +1,22 @@
 {
-  "name": "pentest-engine",
-  "version": "0.1.0",
-  "description": "Human-in-the-Loop Autonomous Web/API Pentest Engine",
+  "name": "pentest-mcp-servers",
+  "version": "1.0.0",
+  "description": "MCP servers for AI-powered penetration testing",
   "private": true,
   "workspaces": [
     "mcp-servers/*"
   ],
   "scripts": {
-    "start": "cd AutoPentest && npm run start",
     "build": "npm run build --workspaces",
     "test": "npm run test --workspaces --if-present",
-    "test:phase1": "vitest run --config tests/phase1/vitest.config.ts",
-    "test:phase2": "vitest run --config tests/phase2/vitest.config.ts",
-    "test:phase3": "vitest run --config tests/phase3/vitest.config.ts",
     "lint": "npm run lint --workspaces --if-present"
   },
   "devDependencies": {
     "typescript": "^5.3.0",
     "@types/node": "^20.0.0",
-    "vitest": "^3.2.4",
-    "js-yaml": "^4.1.0",
-    "@types/js-yaml": "^4.0.9"
+    "vitest": "^3.2.4"
+  },
+  "engines": {
+    "node": ">=20.0.0"
   }
 }
