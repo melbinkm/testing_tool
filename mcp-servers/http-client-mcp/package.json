@@ -1,0 +1,29 @@
+{
+  "name": "http-client-mcp",
+  "version": "1.0.0",
+  "description": "Safe, rate-limited HTTP client MCP server with correlation headers and proxy support",
+  "type": "module",
+  "main": "dist/index.js",
+  "scripts": {
+    "build": "tsc",
+    "start": "node dist/index.js",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "clean": "rm -rf dist"
+  },
+  "keywords": [
+    "mcp",
+    "http-client",
+    "rate-limiting",
+    "security"
+  ],
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.0.0",
+    "undici": "^6.0.0"
+  },
+  "devDependencies": {
+    "@types/node": "^20.0.0",
+    "typescript": "^5.3.0",
+    "vitest": "^3.2.4"
+  }
+}

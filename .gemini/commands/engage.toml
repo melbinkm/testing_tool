@@ -1,0 +1,86 @@
+# /engage - Start new pentest engagement
+# Validates scope file, initializes world model, displays engagement summary
+
+[command]
+name = "engage"
+description = "Start a new pentest engagement with scope validation and initialization"
+version = "1.0.0"
+
+[command.args]
+[command.args.scope_file]
+description = "Path to the scope YAML file (default: scope/engagement.yaml)"
+required = false
+default = "scope/engagement.yaml"
+
+[command.args.engagement_id]
+description = "Custom engagement ID (auto-generated if not provided)"
+required = false
+
+[command.args.environment]
+description = "Environment type: SANDBOX, STAGING, or PRODUCTION"
+required = false
+default = "SANDBOX"
+
+[command.prompt]
+template = """
+Start a new pentest engagement:
+
+1. **Validate Scope File**
+   - Read the scope file: {{scope_file}}
+   - Validate YAML syntax
+   - Verify required fields (allowlist.domains or allowlist.ip_ranges)
+   - Check for logical inconsistencies (e.g., denylist overriding allowlist)
+   - Display any validation errors and STOP if invalid
+
+2. **Initialize Run Manifest**
+   - Generate engagement ID: {{engagement_id}} (or auto-generate)
+   - Set environment: {{environment}}
+   - Calculate scope hash (SHA-256 of scope file)
+   - Record tool versions (nuclei, fuzzer, etc.)
+   - Create manifest at evidence/{run_id}/manifest.json
+
+3. **Initialize World Model**
+   - Create empty hypothesis registry
+   - Initialize endpoint inventory
+   - Set up finding tracker
+   - Initialize action ledger
+
+4. **Display Engagement Summary**
+   ```
+   === NEW ENGAGEMENT STARTED ===
+
+   Engagement ID: {engagement_id}
+   Run ID: {run_id}
+   Environment: {environment}
+   Started: {timestamp}
+
+   SCOPE HASH: {scope_hash}
+
+   SCOPE SUMMARY:
+   - Targets: {count} domains, {count} IP ranges
+   - Budget: {max_requests} requests
+   - Rate Limit: {rps} req/sec
+
+   TOOLS AVAILABLE:
+   - nuclei-mcp: v{version}
+   - fuzzer-mcp: v{version}
+   - http-client-mcp: v{version}
+   - validator-mcp: v{version}
+   - evidence-mcp: v{version}
+
+   Ready to begin reconnaissance.
+   Use /scope to view full scope details.
+   Use /killswitch for emergency stop.
+   ```
+
+5. **Safety Reminders**
+   - Display reminder about scope boundaries
+   - Warn about PRODUCTION environment if selected
+   - Remind about human approval requirements for HIGH risk actions
+"""
+
+[command.metadata]
+category = "pentest"
+risk_level = "medium"
+requires_scope = true
+creates_run = true

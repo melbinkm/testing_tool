@@ -26,18 +26,32 @@ npm run build
 
 ```
 /mnt/d/testing_tool/
+├── .autopentest/                          # Configuration directory
+│   ├── settings.json                      # MCP server and tool settings
+│   ├── config.yaml                        # Project configuration
+│   ├── skills/                            # Custom skills
+│   └── commands/                          # Custom commands
+├── AutoPentest/                           # Main CLI tool (base framework)
+│   ├── packages/
+│   │   ├── cli/                           # CLI application
+│   │   ├── core/                          # Core library
+│   │   ├── a2a-server/                    # A2A server
+│   │   ├── test-utils/                    # Test utilities
+│   │   └── vscode-ide-companion/          # VS Code extension
+│   ├── bundle/                            # Bundled output
+│   └── package.json                       # AutoPentest package config
+├── mcp-servers/                           # MCP server projects (Phase 2+)
+├── scope/                                 # Scope definitions
+│   └── engagement.yaml                    # Engagement scope template
+├── evidence/                              # Evidence storage
+├── logs/                                  # Audit logs
+├── data/                                  # Database files
+├── tests/                                 # Project tests
+│   └── phase1/                            # Phase 1 tests
 ├── CLAUDE.md                              # AI agent guidelines
 ├── SETUP.md                               # This file
-├── autonomous_pentest_engine_sandbox_dev_guide.md  # Development guide
-└── AutoPentest/                           # Main CLI tool
-    ├── packages/
-    │   ├── cli/                           # CLI application
-    │   ├── core/                          # Core library
-    │   ├── a2a-server/                    # A2A server
-    │   ├── test-utils/                    # Test utilities
-    │   └── vscode-ide-companion/          # VS Code extension
-    ├── bundle/                            # Bundled output
-    └── package.json                       # Root package config
+├── package.json                           # Root workspace package.json
+└── autonomous_pentest_engine_sandbox_dev_guide.md  # Development guide
 ```
 
 ### 3. Configuration
@@ -56,13 +70,22 @@ AutoPentest uses `~/.autopentest/` for configuration:
 Create `.autopentestignore` in your project root to exclude files from analysis.
 
 **Scope Configuration:**
-Create a `scope.json` file to define allowed targets:
-```json
-{
-  "domains": ["example.com"],
-  "ip_ranges": ["192.168.1.0/24"],
-  "excluded": ["admin.example.com"]
-}
+Define engagement scope in `scope/engagement.yaml`:
+```yaml
+allowlist:
+  domains:
+    - "*.example.com"
+  ip_ranges:
+    - "192.168.1.0/24"
+denylist:
+  domains:
+    - "production.example.com"
+constraints:
+  rate_limits:
+    requests_per_second: 10
+    max_concurrent: 5
+approval_policy:
+  mode: "INTERACTIVE"  # INTERACTIVE, AUTO_APPROVE, DENY_ALL
 ```
 
 ### 4. Running AutoPentest
@@ -89,21 +112,53 @@ npm start
 
 | Server | Status | Description |
 |--------|--------|-------------|
+| scope-guard-mcp | Implemented | Scope validation and budget tracking |
+| http-client-mcp | Implemented | Rate-limited HTTP client with correlation headers |
+| auth-tester-mcp | Implemented | BOLA/IDOR differential testing with multiple identities |
+| validator-mcp | Implemented | Finding validation with reproduction and confidence scoring |
+| evidence-mcp | Implemented | Evidence bundling, redaction, report generation, audit trail |
+| nuclei-mcp | Implemented | Nuclei vulnerability scanner wrapper with mock mode |
+| fuzzer-mcp | Implemented | Schema-based API fuzzer with signal detection |
 | Recon MCP | Planned | DNS, subdomain enumeration |
-| HTTP MCP | Planned | Request/response handling |
 | Burp MCP | Planned | Burp Suite integration |
-| Evidence MCP | Planned | Finding documentation |
+| ZAP MCP | Future | OWASP ZAP integration |
+
+### 7. Custom Commands
+
+| Command | Description |
+|---------|-------------|
+| `/scope` | Display current engagement scope and budget status |
+| `/engage` | Start new pentest engagement with scope validation |
+| `/killswitch` | Emergency stop - halt all testing operations |
+
+### 8. Skills
+
+| Skill | Description |
+|-------|-------------|
+| pentest-planner | Generate structured test hypotheses from attack surface |
+| vulnerability-validator | Validate findings with reproduction and controls |
 
 ## Development Phases Status
 
-- [ ] Phase 1: Environment Setup
-- [ ] Phase 2: MCP Server Framework
-- [ ] Phase 3: Recon Tools
-- [ ] Phase 4: HTTP Testing
-- [ ] Phase 5: Burp Integration
-- [ ] Phase 6: Evidence Collection
-- [ ] Phase 7: Orchestration
-- [ ] Phase 8: Testing & Validation
+- [x] Phase 1: Environment Setup (Completed 2026-02-05)
+  - Created project directory structure
+  - Created configuration files (settings.json, config.yaml)
+  - Created engagement scope template
+  - Set up npm workspaces
+  - Phase 1 tests passing (38 tests)
+- [x] Phase 2-9: Core MCP Servers (Completed 2026-02-05)
+  - scope-guard-mcp, http-client-mcp, auth-tester-mcp
+  - validator-mcp, evidence-mcp
+  - 451+ tests passing
+- [x] Phase 10: Advanced Tools (Completed 2026-02-05)
+  - nuclei-mcp: Nuclei vulnerability scanner wrapper
+  - fuzzer-mcp: Schema-based API fuzzer
+  - Audit trail components (run manifest, action ledger)
+  - Custom commands (/scope, /engage, /killswitch)
+  - Skills (pentest-planner, vulnerability-validator)
+  - 130+ new tests
+- [ ] Phase 11: ZAP Integration (Future)
+- [ ] Phase 12: Full Orchestration
 
 ## Troubleshooting
 
@@ -134,6 +189,11 @@ Run `npm run bundle` to create the bundle.
 
 | Date | Change | Author |
 |------|--------|--------|
+| 2026-02-05 | Phase 10: Added nuclei-mcp, fuzzer-mcp, audit trail, commands, skills | AI Agent |
+| 2026-02-05 | Added evidence-mcp: Evidence bundling, redaction, report generation (135 tests) | AI Agent |
+| 2026-02-05 | Added validator-mcp: Finding validation with confidence scoring (105 tests) | AI Agent |
+| 2026-02-05 | Added auth-tester-mcp: BOLA/IDOR differential testing (75 tests) | AI Agent |
+| 2026-02-05 | Phase 1 completed: directory structure, configs, scope template, tests | AI Agent |
 | 2026-02-05 | Renamed from gemini-cli to AutoPentest | AI Agent |
 | 2026-02-05 | Initial SETUP.md created | AI Agent |
 

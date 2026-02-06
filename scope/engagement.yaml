@@ -1,0 +1,125 @@
+# Engagement Scope Definition
+# This file defines the boundaries and constraints for penetration testing activities
+
+schema_version: "1.0"
+
+engagement:
+  id: "ENGAGEMENT-001"
+  name: "Example Engagement"
+  client: "Example Client"
+  start_date: "2025-01-01"
+  end_date: "2025-12-31"
+  timezone: "UTC"
+
+# Allowlist - Targets explicitly permitted for testing
+allowlist:
+  domains:
+    - "*.example.com"
+    - "api.example.com"
+  ip_ranges:
+    - "192.168.1.0/24"
+    - "10.0.0.0/8"
+  ports:
+    - 80
+    - 443
+    - 8080
+    - 8443
+  services:
+    - "http"
+    - "https"
+    - "ssh"
+
+# Denylist - Targets explicitly forbidden from testing
+denylist:
+  domains:
+    - "production.example.com"
+    - "*.prod.example.com"
+  ip_ranges:
+    - "192.168.1.1/32"  # Gateway
+  ports:
+    - 22  # SSH on production
+  keywords:
+    - "admin"
+    - "backup"
+
+# Credentials for authenticated testing
+credentials:
+  - id: "cred-001"
+    type: "basic"
+    username_env: "TEST_USER"
+    password_env: "TEST_PASS"
+    scope: ["api.example.com"]
+  - id: "cred-002"
+    type: "bearer"
+    token_env: "API_TOKEN"
+    scope: ["api.example.com/v2/*"]
+
+# Rate limiting and budget constraints
+constraints:
+  rate_limits:
+    requests_per_second: 10
+    max_concurrent: 5
+    burst_limit: 50
+  budget:
+    max_total_requests: 10000
+    max_requests_per_target: 1000
+    max_scan_duration_hours: 8
+  timeouts:
+    connect_timeout_ms: 5000
+    read_timeout_ms: 30000
+    total_timeout_ms: 60000
+
+# Actions that require human approval or are forbidden
+actions:
+  forbidden:
+    - "sql_injection_write"
+    - "data_exfiltration"
+    - "denial_of_service"
+    - "privilege_escalation_persist"
+    - "lateral_movement"
+    - "malware_deployment"
+  requires_approval:
+    - "authentication_bypass"
+    - "file_upload"
+    - "command_injection"
+    - "ssrf"
+    - "xxe"
+
+# Approval policy
+approval_policy:
+  mode: "INTERACTIVE"  # INTERACTIVE, AUTO_APPROVE, DENY_ALL
+  timeout_seconds: 300
+  default_action: "DENY"
+  escalation:
+    on_timeout: "DENY"
+    on_error: "DENY"
+    notify: true
+
+# Evidence collection policy
+evidence_policy:
+  enabled: true
+  storage_path: "./evidence"
+  retention_days: 90
+  auto_capture:
+    - "vulnerabilities"
+    - "authentication_attempts"
+    - "interesting_responses"
+  redact_patterns:
+    - "password"
+    - "token"
+    - "secret"
+    - "key"
+    - "credential"
+  formats:
+    - "json"
+    - "html"
+    - "markdown"
+
+# Logging configuration
+logging:
+  level: "info"
+  audit_trail: true
+  correlation_ids: true
+  output:
+    console: true
+    file: "./logs/engagement.log"
