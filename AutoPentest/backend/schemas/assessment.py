@@ -1,0 +1,85 @@
+"""
+Assessment Pydantic schemas
+"""
+from datetime import date, datetime
+from typing import Optional
+from pydantic import BaseModel, ConfigDict
+
+
+class AssessmentBase(BaseModel):
+    name: str
+    client_name: Optional[str] = None
+    scope: Optional[str] = None
+    limitations: Optional[str] = None
+    objectives: Optional[str] = None
+    start_date: Optional[date] = None
+    end_date: Optional[date] = None
+    target_domains: Optional[list[str]] = None
+    ip_scopes: Optional[list[str]] = None
+    credentials: Optional[str] = None
+    access_info: Optional[str] = None
+    category: Optional[str] = None
+    environment: Optional[str] = "non_specifie"
+    environment_notes: Optional[str] = None
+
+
+class AssessmentCreate(AssessmentBase):
+    """Schema for creating a new assessment"""
+    pass
+
+
+class AssessmentUpdate(BaseModel):
+    """Schema for updating an assessment (all fields optional)"""
+    name: Optional[str] = None
+    client_name: Optional[str] = None
+    scope: Optional[str] = None
+    limitations: Optional[str] = None
+    objectives: Optional[str] = None
+    start_date: Optional[date] = None
+    end_date: Optional[date] = None
+    target_domains: Optional[list[str]] = None
+    ip_scopes: Optional[list[str]] = None
+    credentials: Optional[str] = None
+    access_info: Optional[str] = None
+    category: Optional[str] = None
+    environment: Optional[str] = None
+    environment_notes: Optional[str] = None
+    status: Optional[str] = None  # active, completed, archived
+    folder_id: Optional[int] = None
+
+
+class AssessmentResponse(AssessmentBase):
+    """Schema for assessment response"""
+    id: int
+    status: str  # active, completed, archived
+    workspace_path: Optional[str]
+    container_name: Optional[str]
+    folder_id: Optional[int] = None
+    created_at: datetime
+    updated_at: datetime
+
+    model_config = ConfigDict(from_attributes=True)
+
+
+class AssessmentListResponse(BaseModel):
+    """Schema for list of assessments"""
+    id: int
+    name: str
+    client_name: Optional[str]
+    category: Optional[str]
+    environment: Optional[str]
+    scope: Optional[str]
+    limitations: Optional[str]
+    objectives: Optional[str]
+    start_date: Optional[date]
+    end_date: Optional[date]
+    target_domains: Optional[list[str]]
+    ip_scopes: Optional[list[str]]
+    status: str  # active, completed, archived
+    workspace_path: Optional[str]
+    container_name: Optional[str]
+    folder_id: Optional[int] = None
+    created_at: datetime
+    updated_at: datetime
+
+    model_config = ConfigDict(from_attributes=True)
