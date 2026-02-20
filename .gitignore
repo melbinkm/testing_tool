@@ -64,3 +64,6 @@ pnpm-lock.yaml
 evidence/*.json
 evidence/*.png
 evidence/*.html
+
+# Plans
+plans/
